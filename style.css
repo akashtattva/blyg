@@ -1,0 +1,422 @@
+/* blyg — one hand-written stylesheet, no build step, no web fonts.
+ *
+ * The design idea (session 19): **the editorial apparatus is the design.**
+ * What distinguishes a blyg from a blog is that every item wears its own
+ * revision history in public — "v2 · pinned: v1, v2", Created/Most-recent,
+ * the provenance line under a transcluded quote, the endcap where a withdrawn
+ * item used to be. All of that used to render as one undifferentiated grey
+ * murmur (0.85rem, opacity 0.7). Here it gets its own typeface and its own
+ * colour, consistently, so a reader can learn to read it; the prose gets a
+ * serif and is otherwise left alone.
+ *
+ * The colour that carries it is an editor's blue pencil. To "blue-pencil" a
+ * manuscript is to edit it — the same copy-desk world [TK] comes from — so
+ * every editorial mark on the page is blue: pins, provenance, the rule beside
+ * a transclusion, the kind marker. Prose is ink; nothing else competes.
+ *
+ * NO WEB FONTS, deliberately. A reference client for a decentralised medium
+ * should not make every reader's page load phone a third-party font host;
+ * self-hosted static files that depend on someone else's CDN are not really
+ * self-hosted. System stacks only.
+ */
+:root {
+  color-scheme: light dark;
+  /* --page is the margins, --paper the block the writing sits in. They are
+     the same colour until a theme separates them (see themeCss). */
+  --page: #fafbfb;
+  --paper: #fafbfb;
+  --paper-sunk: #eef1f3;
+  --ink: #1b2426;
+  --ink-soft: #5c686b;
+  --rule: #dde3e5;
+  --pencil: #23608c;
+  /* Highlighted generated spans: a tint and a hairline, quiet enough to read through. */
+  --gen-bg: #eef3f7;
+  --gen-rule: #c9d8e4;
+  --block-pad: 0rem;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Charter, Georgia, "Times New Roman", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* The apparatus layer: small sans, a little looser than the prose. */
+  --apparatus: 0.8125rem/1.5 var(--sans);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: #14191a;
+    --paper: #14191a;
+    --paper-sunk: #1d2426;
+    --ink: #e3e7e7;
+    --ink-soft: #95a2a5;
+    --rule: #2b3436;
+    --pencil: #8cc0e4;
+    --gen-bg: #1a2429;
+    --gen-rule: #2f4552;
+  }
+}
+* { box-sizing: border-box; }
+/* Reserve the scrollbar's width on every page, scrolling or not. A short
+   permalink beside a long feed page would otherwise sit ~7px further right,
+   which is the same jump the shared masthead exists to remove. */
+html { scrollbar-gutter: stable; }
+body {
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 5rem;
+  -webkit-text-size-adjust: 100%;
+}
+/* Also set on the block itself, so an embedded .blyg keeps its own type
+ * inside a host page that never loads this file's body rule. */
+/* The block keeps its 65ch measure whether or not a theme pads it away from
+ * the page, so switching themes never reflows the text. */
+.blyg {
+  max-width: calc(65ch + 2 * var(--block-pad));
+  margin: 0 auto;
+  padding: var(--block-pad);
+  background: var(--paper);
+  border-radius: 3px;
+  font-family: var(--serif);
+  color: var(--ink);
+}
+.blyg a { color: var(--pencil); text-underline-offset: 0.15em; text-decoration-thickness: from-font; }
+.blyg :focus-visible { outline: 2px solid var(--pencil); outline-offset: 2px; border-radius: 2px; }
+::selection { background: color-mix(in srgb, var(--pencil) 22%, transparent); }
+
+/* ---- header + masthead -------------------------------------------------
+ * Two shapes for the same identity. Every page carries the quiet one-line
+ * header (the blyg's name, which is also the way back to its index). The
+ * feed page — the front door, and the only page not meant to be embedded —
+ * carries the name at display size instead, so the header there drops the
+ * name and keeps only the feed link. */
+.blyg-header { margin-bottom: 1.75rem; display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.blyg-header a { color: var(--ink-soft); text-decoration: none; font: var(--apparatus); }
+.blyg-header a:hover { color: var(--pencil); text-decoration: underline; }
+.blyg-header.bare { justify-content: flex-end; margin-bottom: 0.5rem; }
+
+.masthead { display: flex; gap: 1rem; align-items: baseline; margin: 0 0 2.5rem; }
+.masthead .avatar { border-radius: 50%; flex: none; object-fit: cover; align-self: flex-start; }
+.masthead .masthead-text { min-width: 0; }
+.masthead p { margin: 0; }
+.masthead .site-name {
+  font-family: var(--serif);
+  font-size: clamp(1.75rem, 1.3rem + 2vw, 2.4rem);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  margin-bottom: 0.4rem;
+}
+.masthead .site-name a { color: var(--ink); text-decoration: none; }
+.masthead .author-name { font: var(--apparatus); color: var(--ink); }
+.masthead .author-bio { font: var(--apparatus); color: var(--ink-soft); max-width: 48ch; }
+.masthead .author-links { font: var(--apparatus); margin-top: 0.35rem; }
+.masthead .author-links a { color: var(--pencil); text-decoration: none; border-bottom: 1px solid var(--rule); }
+.masthead .author-links a:hover { border-bottom-color: currentColor; }
+
+/* ---- items -------------------------------------------------------------
+ * Space separates items; the rule is a whisper, not a frame. Fragments are
+ * atomic, so they get room to be read as separate things rather than rows. */
+article.fragment, article.thread { border-top: 1px solid var(--rule); padding: 2rem 0 1.75rem; }
+article.fragment:first-of-type, article.thread:first-of-type { border-top: none; padding-top: 0; }
+article.fragment img, article.thread img { max-width: 100%; height: auto; border-radius: 2px; }
+article.fragment > :first-child, article.thread > :first-child { margin-top: 0; }
+/* …and since session 19 that first child is the .item-content wrapper, so the
+ * rule has to reach one level further in to actually reach the prose. */
+.item-content > :first-child { margin-top: 0; }
+.blyg h1, .blyg h2, .blyg h3 { line-height: 1.2; letter-spacing: -0.01em; margin: 1.6em 0 0.5em; }
+.blyg h1 { font-size: 1.5rem; }
+.blyg h2 { font-size: 1.25rem; }
+.blyg h3 { font-size: 1.0625rem; }
+.blyg code, .blyg pre { font-size: 0.9em; }
+.blyg pre { background: var(--paper-sunk); padding: 0.85rem 1rem; border-radius: 3px; overflow-x: auto; }
+.blyg hr { border: none; border-top: 1px solid var(--rule); margin: 2rem 0; }
+
+/* ---- the apparatus -----------------------------------------------------
+ * Everything below is metadata about a document rather than the document:
+ * one face, one size, one colour, so it reads as a single layer. */
+.timestamps, .version-line, .version-note, a.permalink, .provenance, ul.archive .meta, .pinned-banner {
+  font: var(--apparatus);
+  color: var(--ink-soft);
+}
+.timestamps { margin-top: 0.3rem; display: flex; flex-direction: column; gap: 0.05rem; }
+.version-line { margin-top: 1.3rem; }
+.version-line .pins a { color: var(--pencil); text-decoration: none; border-bottom: 1px solid var(--rule); }
+.version-line .pins a:hover { border-bottom-color: currentColor; }
+.version-note { font-style: italic; margin: 0.4rem 0 0; max-width: 52ch; }
+p.permalink, p > a.permalink { margin-top: 0.3rem; }
+a.permalink { color: var(--ink-soft); text-decoration: none; border-bottom: 1px solid var(--rule); }
+a.permalink:hover { color: var(--pencil); border-bottom-color: currentColor; }
+/* A stub's own citation of what it answers. Deliberately *above* the body and
+ * in the apparatus voice: it is the header of a response, not a footnote to
+ * one. The URL is its own anchor text so a dead link still reads as a
+ * citation — which is the whole point of freezing it (see StubCite). */
+.stub-cite {
+  margin: 0 0 0.9rem;
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--pencil);
+  font-family: var(--sans, inherit);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  max-width: 60ch;
+}
+.stub-cite .label { text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.75rem; color: var(--pencil); }
+.stub-cite.compact { margin: 0 0 0.5rem; padding-left: 0; border-left: 0; }
+
+/* The responses list: a citation trail, not a comment section. Same apparatus
+ * voice as the stub's own citation, pointing the other way. No count, ever —
+ * a number here would be the one thing on the page a stranger can move. */
+.responses { margin: 0.3rem 0 0; padding-top: 0.7rem; border-top: 1px solid var(--rule); font-size: 0.85rem; }
+.responses h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--pencil); margin: 0 0 0.4rem; font-weight: 600; }
+.responses ul { list-style: none; margin: 0; padding: 0; }
+.responses li { margin: 0.25rem 0; line-height: 1.5; }
+.responses a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); }
+.responses a:hover { color: var(--pencil); border-bottom-color: currentColor; }
+.responses .who { font-style: italic; }
+.responses .at-origin, .responses .rel, .responses .when { color: var(--ink-soft); }
+.stub-cite cite { font-style: italic; }
+.stub-cite a { color: var(--pencil); text-decoration: none; word-break: break-all; }
+.stub-cite a:hover { text-decoration: underline; }
+.provenance { margin: 0.5rem 0 0; }
+.provenance a { color: var(--pencil); text-decoration: none; }
+.provenance a:hover { text-decoration: underline; }
+
+/* A pinned page is a frozen artifact; the banner says so plainly, in the
+ * apparatus voice, with the blue pencil down its edge. */
+.pinned-banner {
+  border-left: 2px solid var(--pencil);
+  background: var(--paper-sunk);
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 2rem;
+  border-radius: 0 3px 3px 0;
+}
+.pinned-banner a { color: var(--pencil); text-decoration: none; border-bottom: 1px solid var(--rule); }
+
+/* Kind marker. Was an ALL-CAPS bordered chip — the commonest template tell,
+ * and heavier than the thing it labels. A blue lowercase word does the job. */
+.kind-chip { font: var(--apparatus); font-style: italic; color: var(--pencil); margin-right: 0.15rem; }
+/* A thread card's kind line: its own line, styled like the other apparatus
+   labels (.stub-cite .label), so it never runs into the author's first words. */
+.card-kind { font-family: var(--sans, inherit); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--pencil); margin: 0 0 0.5rem; }
+.card-kind .quote-count { text-transform: none; letter-spacing: 0; color: var(--ink-soft); }
+/* The top of the thread's own page, cut at a fixed height. A height clip,
+   not a line clamp: the card holds blockquotes, headings and lists, which
+   -webkit-line-clamp cannot count. The fade is added only when the content
+   overflows (VERSION_NAV_SCRIPT sets .clipped), so a short thread's last line
+   is never dimmed; without script the content is still clipped, just unfaded. */
+.card-clip { max-height: 24rem; overflow: hidden; position: relative; }
+.card-clip.clipped { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 4rem), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 4rem), transparent); }
+.card-clip h1 { font-size: 1.15rem; line-height: 1.25; margin: 0 0 0.35rem; }
+.thread-card .read-more { margin: 0.6rem 0 0; }
+
+/* A transcluded fragment is someone's words held verbatim, so it is set as a
+ * quotation with the editorial blue beside it, not as a tinted card. */
+blockquote.blyg-transclusion {
+  margin: 1.5rem 0;
+  padding: 0.25rem 0 0.25rem 1.1rem;
+  border-left: 2px solid var(--pencil);
+  background: none;
+}
+blockquote.blyg-transclusion > :first-child { margin-top: 0; }
+blockquote.blyg-transclusion p:last-of-type { margin-bottom: 0.25rem; }
+/* Quoted material is subordinate to the document quoting it, so a transcluded
+ * fragment's own headings step down a rank rather than competing with the
+ * thread's prose at full size. */
+blockquote.blyg-transclusion h1, blockquote.blyg-transclusion h2 { font-size: 1.125rem; }
+blockquote.blyg-transclusion h3 { font-size: 1rem; }
+blockquote.blyg-transclusion h1, blockquote.blyg-transclusion h2, blockquote.blyg-transclusion h3 { margin: 1.2em 0 0.4em; }
+
+/* Withdrawn: present, legible, and visibly spent. */
+.withdrawn { color: var(--ink-soft); font-style: italic; }
+
+/* --- pinned-version carousel (feed page) ---------------------------------
+ * Rendered by the server as a plain version line; the ‹ › controls are added
+ * by script, so they only ever exist where they work. */
+.version-line .vnav { display: inline-flex; gap: 0.15rem; margin-right: 0.4rem; vertical-align: baseline; }
+.version-line .vstep {
+  font: var(--apparatus); line-height: 1; color: var(--pencil);
+  background: none; border: 1px solid var(--rule); border-radius: 3px;
+  padding: 0.05rem 0.35rem; cursor: pointer;
+}
+.version-line .vstep:hover:not(:disabled) { border-color: var(--pencil); }
+.version-line .vstep:disabled { color: var(--ink-soft); opacity: 0.4; cursor: default; }
+.version-line .vlatest { margin-left: 0.1rem; }
+.version-line .vextra a { color: var(--pencil); text-decoration: none; border-bottom: 1px solid var(--rule); }
+/* A frozen version showing in place must never be mistaken for the live one,
+ * but the marker must cost nothing in layout: a left rule plus padding
+ * indented the text on every step, so cycling versions slid the whole column
+ * sideways. A tint extended by box-shadow spread paints the same "this is
+ * held, not live" signal *outside* the box — box-shadow is not laid out, so
+ * the text does not move by a single pixel when the version changes. */
+article.showing-pin .item-content {
+  background: var(--paper-sunk);
+  border-radius: 2px;
+  box-shadow: 0 0 0 0.7rem var(--paper-sunk);
+}
+article.showing-pin .item-content > :first-child { margin-top: 0; }
+article.showing-pin .item-content > :last-child { margin-bottom: 0; }
+article.showing-pin .item-content[aria-busy="true"] { opacity: 0.5; }
+
+/* The version label is the only part of the line whose text changes as you
+ * step ("v3" → "v12 · frozen"), and it sits before the pin citations — so
+ * without a reserved width every step nudged everything after it. Fixed box,
+ * left-aligned: the controls and the citations never move. */
+.version-line .vlabel { display: inline-block; min-width: 6.5em; }
+
+/* A titled item's heading is its link; it should read as the heading, with the
+ * link only showing on hover, rather than as a blue headline. */
+.blyg a.item-title { color: inherit; text-decoration: none; }
+.blyg a.item-title:hover { color: var(--pencil); }
+
+/* The blogroll is a list of other people, set apart from your own writing. */
+.blogroll { margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); }
+.blogroll h2 { font: var(--apparatus); font-weight: 600; color: var(--ink-soft); margin: 0 0 0.6rem; letter-spacing: 0; }
+.blogroll ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; }
+.blogroll li { font: var(--apparatus); }
+.blogroll a { color: var(--pencil); text-decoration: none; border-bottom: 1px solid var(--rule); }
+.blogroll a:hover { border-bottom-color: currentColor; }
+.blogroll .blyg-mark { font-style: italic; color: var(--ink-soft); margin-right: 0.1rem; }
+.blogroll-foot { font: var(--apparatus); color: var(--ink-soft); margin: 0.8rem 0 0; }
+.collections { margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); }
+.collections h2 { font: var(--apparatus); font-weight: 600; color: var(--ink-soft); margin: 0 0 0.6rem; letter-spacing: 0; }
+.collections ul { list-style: none; padding: 0; margin: 0; }
+.collections li { font: var(--apparatus); margin: 0 0 0.45rem; overflow-wrap: anywhere; }
+.collections a { color: var(--pencil); text-decoration: none; border-bottom: 1px solid var(--rule); }
+.collections a:hover { border-bottom-color: currentColor; }
+.collections .meta, .collection-head .meta { color: var(--ink-soft); }
+.collection-desc { color: var(--ink-soft); }
+.collections .collection-desc { display: block; }
+/* The links section: chosen threads, collections, the owner's links, and a
+ * foot line of standard links. Below the content by default, set apart like
+ * the blogroll; beside it on a wide screen when the owner picks a side. */
+.blyg-links { margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); font: var(--apparatus); }
+.blyg-links section + section { margin-top: 1.25rem; }
+.blyg-links h2 { font: var(--apparatus); font-weight: 600; color: var(--ink-soft); margin: 0 0 0.5rem; letter-spacing: 0; }
+.blyg-links ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.35rem 1.25rem; }
+.blyg-links li { overflow-wrap: anywhere; }
+.blyg-links a { color: var(--pencil); text-decoration: none; border-bottom: 1px solid var(--rule); }
+.blyg-links a:hover { border-bottom-color: currentColor; }
+.blyg-links .meta { color: var(--ink-soft); }
+.blyg-links ul.links-foot { margin-top: 1.25rem; }
+.links-foot a { color: var(--ink-soft); }
+/* As a side menu, one link per line in a column narrow enough to wrap. */
+.blyg.has-side .blyg-links ul { display: block; }
+.blyg.has-side .blyg-links li { margin: 0 0 0.45rem; }
+.links-toggle { display: none; }
+@media (max-width: 61.99rem) {
+  /* Narrow: the side menu sits under the masthead, folded behind Menu once the script runs. */
+  .blyg.has-side .blyg-links { margin: 0 0 2rem; padding: 0 0 1rem; border-top: 0; border-bottom: 1px solid var(--rule); }
+  .js-links .blyg.has-side .links-toggle { display: inline-block; margin-right: auto; font: var(--apparatus); color: var(--ink-soft); background: none; border: 1px solid var(--rule); border-radius: 4px; padding: 0.35rem 0.75rem; min-height: 2.25rem; cursor: pointer; }
+  .js-links .blyg.has-side .links-toggle[aria-expanded="true"] { color: var(--pencil); border-color: currentColor; }
+  .js-links .blyg.has-side:not(.links-open) .blyg-links { display: none; }
+  .js-links .blyg.has-side > .blyg-header { margin-bottom: 1rem; align-items: center; }
+}
+@media (min-width: 62rem) {
+  .blyg.has-side { max-width: calc(65ch + 14rem + 3rem + 2 * var(--block-pad)); }
+  .blyg.has-side .blyg-body { display: grid; grid-template-columns: minmax(0, 65ch) 14rem; grid-template-areas: "main links"; gap: 3rem; align-items: start; }
+  .blyg.side-left .blyg-body { grid-template-columns: 14rem minmax(0, 65ch); grid-template-areas: "links main"; }
+  .blyg.has-side .blyg-main { grid-area: main; }
+  .blyg.has-side .blyg-links { grid-area: links; position: sticky; top: 1.5rem; margin-top: 0; padding-top: 0; border-top: 0; }
+  /* The header and masthead sit over the content column, not the menu. */
+  .blyg.side-left > .blyg-header, .blyg.side-left > .masthead { margin-left: calc(14rem + 3rem); }
+  .blyg.side-right > .blyg-header, .blyg.side-right > .masthead { margin-right: calc(14rem + 3rem); }
+}
+.collection-head { margin: 0 0 2rem; }
+.collection-head h2 { margin-bottom: 0.3rem; }
+.collection-head p { font: var(--apparatus); margin: 0.2rem 0; overflow-wrap: anywhere; }
+.collection-head .collection-desc { font-style: italic; }
+
+ul.archive { list-style: none; padding: 0; margin: 0; }
+ul.archive li { padding: 0.55rem 0; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+ul.archive .row-main a { text-decoration: none; }
+/* The body tail after a title. Apparatus type, so the row reads as a title
+   with a note under it rather than as one long sentence. */
+ul.archive .row-sub { font: var(--apparatus); color: var(--ink-soft); }
+ul.archive .row-main a:hover { text-decoration: underline; }
+ul.archive .meta { flex: none; white-space: nowrap; }
+footer.older { padding: 2rem 0 0; border-top: 1px solid var(--rule); margin-top: 2rem; }
+footer.older a { font: var(--apparatus); color: var(--pencil); text-decoration: none; }
+footer.older a:hover { text-decoration: underline; }
+
+/* A pasted URL is one unbroken token, and a 65ch measure on a 390px screen is
+   narrower than plenty of them. Without this, one link in one item sets the
+   page's minimum width and every page on the blyg scrolls sideways. Prose gets
+   break-word (breaks only where a word cannot fit); the apparatus, which is
+   where bare URLs and origins actually appear, gets anywhere. */
+article.fragment, article.thread, .thread-card { overflow-wrap: break-word; }
+.provenance, .responses li, .blogroll li, .pinned-banner { overflow-wrap: anywhere; }
+
+@media (max-width: 30rem) {
+  body { padding: 1.5rem 1rem 3rem; }
+  /* A 2rem inset on a phone eats the measure; the sheet still reads as a
+     sheet with half of it. */
+  .blyg { padding: calc(var(--block-pad) / 2); max-width: calc(65ch + var(--block-pad)); }
+  ul.archive li { flex-direction: column; gap: 0.15rem; }
+  /* The masthead is the one row on a public page that pairs a fixed-size
+     image with text that has to wrap. */
+  .masthead { gap: 0.75rem; }
+  /* The version arrows are an apparatus-sized control — about 18px tall,
+     which is a fine mouse target and not a thumb target. They are also the
+     only buttons on a public page, so this is the whole tap-target problem. */
+  .version-line .vnav { gap: 0.3rem; }
+  .version-line .vstep { padding: 0.45rem 0.6rem; }
+}
+/* The robot badge is a button only where highlighting is on (see
+   generatedHighlightRules); elsewhere it is not rendered at all. */
+.gen-badge { display: none; }
+/* The disclosure box the robot opens (GEN_INFO_SCRIPT): one per page, fixed
+   to the viewport so a clipped feed card cannot cut it off. */
+.gen-pop { position: fixed; z-index: 50; box-sizing: border-box; width: max-content; max-width: min(20rem, calc(100vw - 1rem)); padding: 0.6rem 0.75rem; background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-radius: 8px; box-shadow: 0 6px 24px rgb(0 0 0 / 0.18); font: var(--apparatus); }
+.gen-pop[hidden] { display: none; }
+.gen-pop .gen-pop-h { margin: 0 0 0.25rem; font-weight: 600; color: var(--pencil); }
+.gen-pop p { margin: 0 0 0.4rem; }
+.gen-pop dl { display: grid; grid-template-columns: auto 1fr; gap: 0.1rem 0.6rem; margin: 0; }
+.gen-pop dt { color: var(--ink-soft); }
+.gen-pop dd { margin: 0; overflow-wrap: anywhere; }
+.gen-pop a { color: var(--pencil); text-decoration: none; }
+.gen-pop a:hover { text-decoration: underline; }
+
+/* Click-to-play YouTube poster (EMBED_SCRIPT, studio#9). A 16:9 box from
+   first paint, so pressing play swaps one box for another of the same size. */
+.yt-facade { margin: 1rem 0; }
+.yt-facade .yt-play, .yt-facade .yt-frame {
+  position: relative; display: block; box-sizing: border-box; width: 100%; aspect-ratio: 16 / 9;
+  margin: 0; padding: 0; border: 1px solid var(--rule); border-radius: 2px; overflow: hidden;
+  background: var(--paper-sunk); cursor: pointer; font: inherit; color: inherit;
+}
+.yt-facade .yt-frame { border: 0; cursor: auto; }
+article .yt-facade .yt-play img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; border-radius: 0; }
+.yt-facade .yt-play::before {
+  content: ""; position: absolute; top: 50%; left: 50%; z-index: 1; width: 3.6rem; height: 3.6rem; margin: -1.8rem 0 0 -1.8rem;
+  border-radius: 50%; background: var(--pencil); box-shadow: 0 2px 10px rgb(0 0 0 / 0.3); transition: transform 0.15s ease;
+}
+.yt-facade .yt-play::after {
+  content: ""; position: absolute; top: 50%; left: 50%; z-index: 2; margin: -0.7rem 0 0 -0.4rem;
+  border-style: solid; border-width: 0.7rem 0 0.7rem 1.15rem; border-color: transparent transparent transparent var(--paper);
+}
+.yt-facade .yt-play:hover::before, .yt-facade .yt-play:focus-visible::before { transform: scale(1.07); }
+.yt-facade figcaption { margin-top: 0.35rem; font: var(--apparatus); color: var(--ink-soft); overflow-wrap: anywhere; }
+.yt-facade figcaption a { color: var(--ink-soft); }
+@media (prefers-reduced-motion: reduce) { .yt-facade .yt-play::before { transition: none; } }
+/* An off-origin image that failed to load, shown as a link to it. */
+.img-fallback {
+  display: inline-block; padding: 0.35rem 0.6rem; border: 1px dashed var(--rule); border-radius: 2px;
+  font: var(--apparatus); color: var(--pencil); overflow-wrap: anywhere;
+}
+
+.gen-on .blyg-tk-gen { background: var(--gen-bg); box-shadow: inset 0 0 0 1px var(--gen-rule); border-radius: 4px; }
+.gen-on div.blyg-tk-gen { position: relative; padding: 0.5rem 0.75rem 1.15rem; margin: 0.75rem 0 1.5rem; }
+.gen-on div.blyg-tk-gen > :first-child:not(.gen-badge), .gen-on div.blyg-tk-gen > .gen-badge + * { margin-top: 0; }
+.gen-on div.blyg-tk-gen > :last-child { margin-bottom: 0; }
+.gen-on div.blyg-tk-gen:not(.gen-ready)::before { content: ""; position: absolute; left: 0.65rem; bottom: -13px; box-sizing: border-box; width: 30px; height: 26px; border: 1px solid color-mix(in srgb, var(--ink-soft) 55%, var(--gen-rule)); border-radius: 6px; background: var(--paper); }
+.gen-on div.blyg-tk-gen:not(.gen-ready)::after { content: ""; position: absolute; left: calc(0.65rem + 6px); bottom: -10px; width: 18px; height: 18px; background: var(--ink-soft); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M12 8V4H8%22/%3E%3Crect width=%2216%22 height=%2212%22 x=%224%22 y=%228%22 rx=%222%22/%3E%3Cpath d=%22M2 14h2M20 14h2M15 13v2M9 13v2%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M12 8V4H8%22/%3E%3Crect width=%2216%22 height=%2212%22 x=%224%22 y=%228%22 rx=%222%22/%3E%3Cpath d=%22M2 14h2M20 14h2M15 13v2M9 13v2%22/%3E%3C/svg%3E") center / contain no-repeat; }
+/* An inline span that wraps keeps its box on every line it touches. */
+.gen-on span.blyg-tk-gen { padding: 0.05rem 0.2rem; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.gen-on span.blyg-tk-gen:not(.gen-ready)::before { content: ""; display: inline-block; width: 0.9em; height: 0.9em; margin-right: 0.2em; vertical-align: -0.1em; background: var(--ink-soft); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M12 8V4H8%22/%3E%3Crect width=%2216%22 height=%2212%22 x=%224%22 y=%228%22 rx=%222%22/%3E%3Cpath d=%22M2 14h2M20 14h2M15 13v2M9 13v2%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M12 8V4H8%22/%3E%3Crect width=%2216%22 height=%2212%22 x=%224%22 y=%228%22 rx=%222%22/%3E%3Cpath d=%22M2 14h2M20 14h2M15 13v2M9 13v2%22/%3E%3C/svg%3E") center / contain no-repeat; }
+.gen-on .gen-badge { display: inline-block; position: relative; margin: 0; padding: 0; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
+.gen-on .gen-badge::after { content: ""; position: absolute; background: var(--ink-soft); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M12 8V4H8%22/%3E%3Crect width=%2216%22 height=%2212%22 x=%224%22 y=%228%22 rx=%222%22/%3E%3Cpath d=%22M2 14h2M20 14h2M15 13v2M9 13v2%22/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M12 8V4H8%22/%3E%3Crect width=%2216%22 height=%2212%22 x=%224%22 y=%228%22 rx=%222%22/%3E%3Cpath d=%22M2 14h2M20 14h2M15 13v2M9 13v2%22/%3E%3C/svg%3E") center / contain no-repeat; }
+.gen-on div.blyg-tk-gen > .gen-badge { position: absolute; left: 0.65rem; bottom: -13px; box-sizing: border-box; width: 30px; height: 26px; border: 1px solid color-mix(in srgb, var(--ink-soft) 55%, var(--gen-rule)); border-radius: 6px; background: var(--paper); }
+.gen-on div.blyg-tk-gen > .gen-badge::after { inset: 3px 5px; }
+.gen-on span.blyg-tk-gen > .gen-badge { width: 0.9em; height: 0.9em; margin-right: 0.2em; vertical-align: -0.1em; }
+.gen-on span.blyg-tk-gen > .gen-badge::after { inset: 0; }
+.gen-on .gen-badge:focus-visible { outline: 2px solid var(--pencil); outline-offset: 2px; }

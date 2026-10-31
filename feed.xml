@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- cache-generation:5b22786d6c2d313a302e34392e31222c223463346531323830353230356637353035393632326534373335656564633139222c325d -->
+<rss version="2.0" xmlns:blyg="https://blygger.org/ns/0.1" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>akashtattva</title>
+    <link>https://akashtattva.github.io/blyg/</link>
+    <description>akashtattva</description>
+    <atom:link href="https://akashtattva.github.io/blyg/feed.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 31 Oct 2026 10:50:24 GMT</lastBuildDate>
+    <blyg:level>2</blyg:level>
+    <blyg:manifest>https://akashtattva.github.io/blyg/blyg.json</blyg:manifest>
+
+  </channel>
+</rss>
