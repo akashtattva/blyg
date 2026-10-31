@@ -1,0 +1,3 @@
+# The tree is exported byte-for-byte from a running blyg. Let git store and
+# check out exactly those bytes on every platform — no EOL rewriting.
+* -text
